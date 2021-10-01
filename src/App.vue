@@ -3,7 +3,7 @@
     <router-link to="/">Home</router-link> |
     <router-link to="/about">About</router-link>
   </div> -->
-  <div id="navbar">Test</div>
+  <!-- <div id="navbar">Test</div> -->
   <router-view />
 </template>
 
@@ -15,7 +15,7 @@
   text-align: center;
   color: #ffffff;
   height: 100%;
-  margin-top: 50px;
+  // margin-top: 50px;
   background: #394049;
 }
 

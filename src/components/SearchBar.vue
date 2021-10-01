@@ -1,18 +1,18 @@
 <template>
   <div class="search-box">
     <div class="search-bar">
+      <i class="fab fa-github icon"></i>
       <input
+        @keyup.enter="sendReqI"
         type="text"
-        v-model="username"
         @input="sendReq"
-        :style="{
-          'border-radius': open && users ? '30px 0 0 0' : '30px 0 0 30px',
-        }"
-        @focus="openRes"
-        @blur="openRes"
+        v-model="username"
+        @focus="openRes(true)"
+        @blur="openRes(false)"
       />
+
       <button @click="sendReqI">
-        <i class="fa fa-search"></i>
+        <i class="fa fa-search"> </i>
       </button>
     </div>
     <div
@@ -36,8 +36,8 @@ export default {
     const open = ref(false);
     let timer = null;
 
-    const openRes = () => {
-      open.value = !open.value;
+    const openRes = (v) => {
+      open.value = v;
     };
 
     const sendReq = async () => {
@@ -49,7 +49,12 @@ export default {
         console.log("hi");
         if (username.value) {
           const response = await fetch(
-            "https://api.github.com/search/users?q=" + username.value
+            "https://api.github.com/search/users?q=" + username.value,
+            {
+              headers: {
+                Authorization: "",
+              },
+            }
           );
 
           var data = await response.json();
@@ -62,15 +67,21 @@ export default {
     };
 
     const sendReqI = async () => {
-      console.log("hi");
+      open.value = false;
+      console.log("Instnt req");
       if (username.value) {
         const response = await fetch(
-          "https://api.github.com/search/users?q=" + username.value
+          "https://api.github.com/search/users?q=" + username.value,
+          {
+            headers: {
+              Authorization: "",
+            },
+          }
         );
 
         var data = await response.json();
         console.log(data.items);
-        users.value = await data.items;
+        emit("get-results", data);
       } else {
         users.value = "";
       }
@@ -94,6 +105,10 @@ export default {
 </script>
 
 <style lang="less" scoped>
+.search-box {
+  width: 100%;
+}
+
 .search-bar {
   margin-top: 10px;
   width: 100%;
@@ -101,12 +116,22 @@ export default {
   display: flex;
   justify-content: center;
   align-items: center;
+  .icon {
+    font-size: 2rem;
+    width: 50px;
+    background: #181d2c;
+    border-radius: 50% 0 0 50%;
+    height: 50px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
   input {
-    width: calc(100% - 140px);
+    width: calc(100% - 190px);
     transition: 0.3s;
     height: 50px;
     border: none;
-    border-radius: 20px 0 0 20px;
+    border-radius: 0;
     background: #181d2c;
     color: white;
     outline: none;
@@ -124,9 +149,10 @@ export default {
   }
 }
 .response-data {
-  width: calc(100% - 100px);
+  width: calc(100% - 150px);
   height: 0px;
-  margin-right: 80px;
+  margin-right: 90px;
+  margin-left: 60px;
   transition: 0.3s;
   background: #181d2c;
   max-height: 300px;

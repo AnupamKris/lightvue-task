@@ -1,44 +1,68 @@
 <template>
   <div class="home">
-    <search-bar @get-profile="getProfile"></search-bar>
-    <div class="profile" v-if="data">
-      <img :src="data.avatar_url" alt="" />
-      <h3>
-        {{ data.login }}
-      </h3>
-      <div class="repos">
-        <h5 v-for="item in repos" :key="item.id">{{ item.name }}</h5>
-      </div>
+    <search-bar
+      @get-profile="getProfile"
+      @get-results="getResults"
+    ></search-bar>
+
+    <div class="results" v-if="searchResults">
+      <user-profile
+        v-for="(item, key) in searchResults"
+        :key="item.id"
+        :data="item"
+        @get-profile="getProfile"
+      ></user-profile>
+    </div>
+    <div class="profile" v-if="Object.keys(profileData).includes('followers')">
+      <profile-view :profileData="profileData" :repos="repos"> </profile-view>
     </div>
   </div>
 </template>
 
 <script>
 // @ is an alias to /src
-import HelloWorld from "@/components/HelloWorld.vue";
 import { ref } from "@vue/reactivity";
 
 export default {
   name: "Home",
-  components: {
-    HelloWorld,
-  },
-  emits: ["get-profile"],
+  components: {},
+  emits: ["get-profile", "get-results"],
   setup() {
-    const data = ref("");
+    const profileData = ref("");
+    const searchResults = ref("");
     const repos = ref("");
+
     const getProfile = async (user) => {
-      data.value = user;
-
-      const res = await fetch(data.value.repos_url);
+      searchResults.value = "";
+      profileData.value = user;
+      console.log("here ia am ", profileData.value.login);
+      const res = await fetch(profileData.value.repos_url, {
+        headers: {
+          Authorization: "",
+        },
+      });
       repos.value = await res.json();
-      console.log(repos.value);
 
-      // window.open("https://github.com/" + user.login, "_blank");
+      const profres = await fetch(profileData.value.url, {
+        headers: {
+          Authorization: "",
+        },
+      });
+      profileData.value = await profres.json();
+      console.log("PROFILE UPDATESD", profileData.value);
     };
+
+    const getResults = (users) => {
+      profileData.value = "";
+      console.log(users);
+      searchResults.value = users.items;
+    };
+
     return {
       getProfile,
-      data,
+      getResults,
+      searchResults,
+      profileData,
       repos,
     };
   },
@@ -53,13 +77,34 @@ export default {
   background: #0a0d16;
   height: 100%;
   width: 100%;
+  display: flex;
+  // justify-content: center;
+  align-items: center;
+  flex-direction: column;
+  .results {
+    margin-top: 5px;
+    height: 100%;
+    width: 100%;
+    overflow: auto;
+    display: flex;
+    align-items: center;
+    flex-direction: column;
+    scrollbar-width: none;
+    &::-webkit-scrollbar {
+      display: none;
+    }
+  }
+  .profile {
+    height: 100%;
+    width: 100%;
+    overflow: auto;
+  }
 }
-
-.profile {
-  img {
-    width: 300px;
-    height: 300px;
-    border-radius: 150px;
+@media only screen and (max-width: 600px) {
+  .home {
+    .profile {
+      overflow: auto;
+    }
   }
 }
 </style>
