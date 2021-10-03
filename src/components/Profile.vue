@@ -104,7 +104,6 @@ export default {
     align-self: flex-start;
     display: flex;
     flex-direction: column;
-    overflow: auto;
     h1 {
       text-align: left;
       color: #ffffff;

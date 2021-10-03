@@ -1,16 +1,31 @@
 <template>
   <div class="search-box">
     <div class="search-bar">
-      <i class="fab fa-github icon"></i>
+      <div class="icon">
+        <i
+          :class="settings ? 'fa fa-times' : 'fa fa-gear'"
+          @click="openSettings"
+        >
+        </i>
+        <div class="settings" v-if="settings">
+          <div class="access setting-field">
+            <input
+              type="text"
+              v-model="access_token"
+              placeholder="Enter GitHub Access Token"
+            />
+            <button @click="setAccessToken"><i class="fa fa-check"></i></button>
+          </div>
+        </div>
+      </div>
       <input
-        @keyup.enter="sendReqI"
         type="text"
-        @input="sendReq"
         v-model="username"
+        @keyup.enter="sendReqI"
+        @input="sendReq"
         @focus="openRes(true)"
         @blur="openRes(false)"
       />
-
       <button @click="sendReqI">
         <i class="fa fa-search"> </i>
       </button>
@@ -28,13 +43,26 @@
 
 <script>
 import { ref } from "@vue/reactivity";
+import { useStore } from "vuex";
 export default {
   setup(props, { emit }) {
     const username = ref("");
     const users = ref("");
+    const access_token = ref("");
+    const settings = ref(false);
+    const store = useStore();
+
+    const setAccessToken = () => {
+      settings.value = false;
+      store.state.accessToken = access_token.value;
+    };
 
     const open = ref(false);
     let timer = null;
+
+    const openSettings = () => {
+      settings.value = !settings.value;
+    };
 
     const openRes = (v) => {
       open.value = v;
@@ -46,13 +74,12 @@ export default {
         timer = null;
       }
       timer = setTimeout(async () => {
-        console.log("hi");
         if (username.value) {
           const response = await fetch(
             "https://api.github.com/search/users?q=" + username.value,
             {
               headers: {
-                Authorization: "",
+                Authorization: store.state.accessToken,
               },
             }
           );
@@ -74,7 +101,7 @@ export default {
           "https://api.github.com/search/users?q=" + username.value,
           {
             headers: {
-              Authorization: "",
+              Authorization: store.state.accessToken,
             },
           }
         );
@@ -96,6 +123,10 @@ export default {
       sendReqI,
       getProfile,
       openRes,
+      openSettings,
+      setAccessToken,
+      access_token,
+      settings,
       username,
       users,
       open,
@@ -125,7 +156,42 @@ export default {
     display: flex;
     justify-content: center;
     align-items: center;
+    .settings {
+      position: absolute;
+      width: 250px;
+      height: 60px;
+      background: #181d2c;
+      top: 70px;
+      left: 10px;
+      border-radius: 10px;
+      display: flex;
+      justify-content: space-around;
+      align-items: center;
+      flex-direction: column;
+      .setting-field {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        input {
+          height: 40px;
+          padding: 0 10px;
+          width: 170px;
+          border-radius: 10px 0 0 10px;
+          text-align: center;
+          background: #0a0816;
+        }
+        button {
+          height: 40px;
+          width: 40px;
+          border-radius: 0 10px 10px 0;
+          color: #ffffff;
+          background: #2c3551;
+          font-size: 1rem;
+        }
+      }
+    }
   }
+
   input {
     width: calc(100% - 190px);
     transition: 0.3s;

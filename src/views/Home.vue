@@ -21,6 +21,7 @@
 
 <script>
 // @ is an alias to /src
+import { useStore } from "vuex";
 import { ref } from "@vue/reactivity";
 
 export default {
@@ -28,9 +29,11 @@ export default {
   components: {},
   emits: ["get-profile", "get-results"],
   setup() {
+    const store = useStore();
     const profileData = ref("");
     const searchResults = ref("");
     const repos = ref("");
+    const accessToken = ref("");
 
     const getProfile = async (user) => {
       searchResults.value = "";
@@ -38,14 +41,14 @@ export default {
       console.log("here ia am ", profileData.value.login);
       const res = await fetch(profileData.value.repos_url, {
         headers: {
-          Authorization: "",
+          Authorization: store.state.accessToken,
         },
       });
       repos.value = await res.json();
 
       const profres = await fetch(profileData.value.url, {
         headers: {
-          Authorization: "",
+          Authorization: store.state.accesstoken,
         },
       });
       profileData.value = await profres.json();
@@ -61,6 +64,7 @@ export default {
     return {
       getProfile,
       getResults,
+
       searchResults,
       profileData,
       repos,
